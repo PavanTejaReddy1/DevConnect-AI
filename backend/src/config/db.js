@@ -9,13 +9,15 @@ const connectDB = async () => {
     mongoose.set('strictQuery', true);
 
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      connectTimeoutMS: 10000,
-      maxPoolSize: 10,
-      minPoolSize: 2,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 60000,
+      connectTimeoutMS: 30000,
+      maxPoolSize: 50,
+      minPoolSize: 5,
       retryWrites: true,
       retryableWrites: true,
+      bufferCommands: false,
+      bufferMaxEntries: 0,
     });
 
     console.log(`MongoDB connected: ${conn.connection.host}`);
