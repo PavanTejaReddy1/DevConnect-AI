@@ -10,7 +10,16 @@ import User from './models/User.js';
 
 const PORT = process.env.PORT || 5000;
 
-await connectDB();
+// Connect to MongoDB
+let dbConnected = false;
+try {
+  await connectDB();
+  dbConnected = true;
+  console.log('MongoDB connected successfully');
+} catch (error) {
+  console.error('MongoDB connection failed:', error.message);
+  // Don't exit in serverless, allow the app to start for health checks
+}
 
 const server = http.createServer(app);
 
@@ -34,7 +43,7 @@ io.use(async (socket, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password');
-    
+
     if (!user) {
       return next(new Error('User not found'));
     }
@@ -58,13 +67,17 @@ io.on('connection', (socket) => {
   });
 
   // Join user's conversations
-  Conversation.find({
-    'participants.user': socket.user._id,
-  }).then(conversations => {
-    conversations.forEach(conv => {
-      socket.join(conv._id.toString());
+  if (dbConnected) {
+    Conversation.find({
+      'participants.user': socket.user._id,
+    }).then(conversations => {
+      conversations.forEach(conv => {
+        socket.join(conv._id.toString());
+      });
+    }).catch(err => {
+      console.error('Error joining conversations:', err);
     });
-  });
+  }
 
   // Join typing indicator room
   socket.on('join:conversation', (conversationId) => {
@@ -78,24 +91,30 @@ io.on('connection', (socket) => {
 
   // Typing indicator
   socket.on('typing:start', async ({ conversationId }) => {
-    const conversation = await Conversation.findById(conversationId);
-    if (conversation && conversation.participants.some(p => p.user.toString() === socket.user._id.toString())) {
-      // Add user to typing list
-      if (!conversation.typingUsers.includes(socket.user._id)) {
-        conversation.typingUsers.push(socket.user._id);
-        await conversation.save();
+    if (!dbConnected) return;
+    try {
+      const conversation = await Conversation.findById(conversationId);
+      if (conversation && conversation.participants.some(p => p.user.toString() === socket.user._id.toString())) {
+        // Add user to typing list
+        if (!conversation.typingUsers.includes(socket.user._id)) {
+          conversation.typingUsers.push(socket.user._id);
+          await conversation.save();
+        }
+        socket.to(conversationId).emit('typing:start', {
+          conversationId,
+          user: {
+            _id: socket.user._id,
+            name: socket.user.name,
+          },
+        });
       }
-      socket.to(conversationId).emit('typing:start', {
-        conversationId,
-        user: {
-          _id: socket.user._id,
-          name: socket.user.name,
-        },
-      });
+    } catch (error) {
+      console.error('Error handling typing:start:', error);
     }
   });
 
   socket.on('typing:stop', async ({ conversationId }) => {
+    if (!dbConnected) return;
     try {
       // Validate conversationId is a valid ObjectId
       if (!conversationId || !/^[0-9a-fA-F]{24}$/.test(conversationId)) {
@@ -112,12 +131,13 @@ io.on('connection', (socket) => {
         });
       }
     } catch (error) {
-      // Error handling typing stop
+      console.error('Error handling typing:stop:', error);
     }
   });
 
   // Send message
   socket.on('message:send', async (data) => {
+    if (!dbConnected) return;
     try {
       const { conversationId, content, messageType = 'text', replyTo } = data;
 
@@ -183,16 +203,12 @@ io.on('connection', (socket) => {
       });
     } catch (error) {
       socket.emit('error', { message: 'Failed to send message' });
-    }// Validate conversationId is a valid ObjectId
-      if (!conversationId || !/^[0-9a-fA-F]{24}$/.test(conversationId)) {
-        return;
-      }
-
-      
+    }
   });
 
   // Mark as read
   socket.on('message:read', async ({ conversationId }) => {
+    if (!dbConnected) return;
     try {
       const conversation = await Conversation.findById(conversationId);
       if (conversation) {
@@ -203,12 +219,13 @@ io.on('connection', (socket) => {
         });
       }
     } catch (error) {
-      // Error marking as read
+      console.error('Error marking as read:', error);
     }
   });
 
   // Add reaction
   socket.on('message:reaction', async ({ messageId, emoji }) => {
+    if (!dbConnected) return;
     try {
       const message = await Message.findById(messageId);
       if (!message) {
@@ -249,15 +266,20 @@ io.on('connection', (socket) => {
 
   // Disconnect
   socket.on('disconnect', async () => {
+    if (!dbConnected) return;
 
     // Remove user from online users
     onlineUsers.delete(socket.user._id.toString());
 
     // Update user's online status in conversations
-    await Conversation.updateMany(
-      { 'participants.user': socket.user._id },
-      { $set: { 'participants.$.isOnline': false } }
-    );
+    try {
+      await Conversation.updateMany(
+        { 'participants.user': socket.user._id },
+        { $set: { 'participants.$.isOnline': false } }
+      );
+    } catch (error) {
+      console.error('Error updating online status:', error);
+    }
 
     // Broadcast offline status
     socket.broadcast.emit('user:offline', {
@@ -266,6 +288,12 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`DevConnect AI API listening on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
-});
+// Only start the server if not in a serverless environment
+if (process.env.VERCEL !== '1') {
+  server.listen(PORT, () => {
+    console.log(`DevConnect AI API listening on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
+  });
+}
+
+// Export for Vercel serverless function
+export default app;
