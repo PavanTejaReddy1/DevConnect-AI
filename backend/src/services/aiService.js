@@ -4,7 +4,7 @@ import Groq from 'groq-sdk';
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Helper function to generate content with error handling
-async function generateContent(prompt, model = 'llama3-70b-8192') {
+async function generateContent(prompt, model = 'llama3-8b-8192') {
   try {
     if (!process.env.GROQ_API_KEY) {
       throw new Error('GROQ_API_KEY is not configured');
