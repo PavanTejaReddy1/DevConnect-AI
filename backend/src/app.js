@@ -20,6 +20,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust proxy for Vercel deployment
+app.set('trust proxy', true);
+
 // --- Core middleware ---
 app.use(
   helmet({
