@@ -44,7 +44,11 @@ app.use(
 );
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || ['http://localhost:5173', 'https://dev-connect-ai-656l.vercel.app'],
+    origin: process.env.CLIENT_URL || [
+      'http://localhost:5173',
+      'https://dev-connect-ai-656l.vercel.app',
+      'https://dev-connect-ai-656l-git-main-pavan-teja-reddys-projects.vercel.app'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
