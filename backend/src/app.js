@@ -93,6 +93,11 @@ app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'DevConnect AI API is running' });
 });
 
+// Root route for deployment health check
+app.get('/', (req, res) => {
+  res.json({ success: true, message: 'DevConnect AI API is running', version: '1.0.0' });
+});
+
 // --- Routes ---
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/projects', apiLimiter, projectRoutes);
