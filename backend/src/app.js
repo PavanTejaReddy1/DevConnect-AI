@@ -102,6 +102,25 @@ app.get('/', (req, res) => {
   res.json({ success: true, message: 'DevConnect AI API is running', version: '1.0.0' });
 });
 
+// API base route
+app.get('/api', (req, res) => {
+  res.json({
+    success: true,
+    message: 'DevConnect AI API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      projects: '/api/projects',
+      teams: '/api/teams',
+      tasks: '/api/tasks',
+      messages: '/api/conversations',
+      notifications: '/api/notifications',
+      ai: '/api/ai'
+    }
+  });
+});
+
 // --- Routes ---
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/projects', apiLimiter, projectRoutes);
