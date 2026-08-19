@@ -3,15 +3,12 @@ import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 import RouteLoader from './components/common/RouteLoader.jsx';
 
-// Landing + Auth are eager: they're what anonymous visitors hit first and
-// are cheap on their own. Dashboard + Admin pull in recharts and a much
-// larger component tree, so they're code-split behind login instead of
-// bloating the public marketing bundle.
 import LandingPage from './pages/Landing/LandingPage.jsx';
 import LoginPage from './pages/Auth/LoginPage.jsx';
 import SignupPage from './pages/Auth/SignupPage.jsx';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage.jsx';
 import ResetPasswordPage from './pages/Auth/ResetPasswordPage.jsx';
+import NotFoundPage from './pages/NotFoundPage.jsx';
 
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout.jsx'));
 
@@ -52,6 +49,9 @@ export default function App() {
             <Route path="/dashboard/settings" element={<SettingsPage />} />
           </Route>
         </Route>
+
+        {/* 404 — must be last */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   );

@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { FiArrowRight, FiCompass, FiGithub, FiCheckCircle, FiStar } from 'react-icons/fi';
 import { HiCheckBadge } from 'react-icons/hi2';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Container from '../common/Container.jsx';
 import AmbientBackground from '../common/AmbientBackground.jsx';
@@ -73,28 +74,48 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.24 }}
             className="mt-9 flex flex-col items-center gap-4 sm:flex-row lg:justify-start"
           >
-            <motion.a
-              href={isAuthenticated ? "/dashboard" : "/signup"}
+            <motion.div
               whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
               whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-              className="btn-primary group relative w-full gap-2 overflow-hidden px-6 py-3 text-base sm:w-auto"
+              className="w-full sm:w-auto"
             >
-              <span className="relative z-10 flex items-center gap-2">
-                Get Started
-                <FiArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-              </span>
-              {/* Sheen sweep on hover */}
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" aria-hidden="true" />
-            </motion.a>
-            <motion.a
-              href={isAuthenticated ? "/dashboard/projects" : "#showcase"}
-              whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
-              whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-              className="btn-secondary w-full gap-2 px-6 py-3 text-base sm:w-auto"
-            >
-              <FiCompass className="h-4 w-4" aria-hidden="true" />
-              Explore Projects
-            </motion.a>
+              <Link
+                to={isAuthenticated ? "/dashboard" : "/signup"}
+                className="btn-primary group relative flex w-full items-center justify-center gap-2 overflow-hidden px-6 py-3 text-base sm:w-auto"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  Get Started
+                  <FiArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                </span>
+                {/* Sheen sweep on hover */}
+                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" aria-hidden="true" />
+              </Link>
+            </motion.div>
+            {isAuthenticated ? (
+              <motion.div
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
+                className="w-full sm:w-auto"
+              >
+                <Link
+                  to="/dashboard/projects"
+                  className="btn-secondary flex w-full items-center justify-center gap-2 px-6 py-3 text-base sm:w-auto"
+                >
+                  <FiCompass className="h-4 w-4" aria-hidden="true" />
+                  Explore Projects
+                </Link>
+              </motion.div>
+            ) : (
+              <motion.a
+                href="#showcase"
+                whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
+                className="btn-secondary w-full gap-2 px-6 py-3 text-base sm:w-auto"
+              >
+                <FiCompass className="h-4 w-4" aria-hidden="true" />
+                Explore Projects
+              </motion.a>
+            )}
           </motion.div>
 
           {/* Trust + GitHub + no-credit-card badges */}

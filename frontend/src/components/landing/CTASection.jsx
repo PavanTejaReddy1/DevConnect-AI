@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { FiArrowRight, FiGithub } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Container from '../common/Container.jsx';
 import Reveal from '../common/Reveal.jsx';
@@ -23,15 +24,18 @@ export default function CTASection() {
                 Create your profile, find your team, and ship your next project with DevConnect AI.
               </p>
               <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <motion.a
-                  href={isAuthenticated ? "/dashboard" : "/signup"}
+                <motion.div
                   whileHover={prefersReducedMotion ? undefined : { scale: 1.03 }}
                   whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-medium text-primary shadow-card sm:w-auto"
                 >
-                  Get Started
-                  <FiArrowRight className="h-4 w-4" aria-hidden="true" />
-                </motion.a>
+                  <Link
+                    to={isAuthenticated ? "/dashboard" : "/signup"}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-medium text-primary shadow-card sm:w-auto"
+                  >
+                    Get Started
+                    <FiArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </motion.div>
                 <motion.a
                   href="https://github.com"
                   target="_blank"

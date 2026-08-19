@@ -1,1 +1,0 @@
-import{j as c}from"./index-BWvRjWG9.js";function d({variant:s="solid",className:a="",children:r,...o}){const t=s==="glass"?"glass-card":"surface-card";return c.jsx("div",{className:`${t} ${a}`,...o,children:r})}export{d as C};
